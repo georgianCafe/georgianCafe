@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Меню</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #1a1a1a; }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      user-select: none;
+    }
+
+    #slide-img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.22s ease;
+    }
+
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 42px; height: 76px;
+      background: rgba(0,0,0,0.42);
+      border: none;
+      color: rgba(255,255,255,0.8);
+      font-size: 1.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: background 0.2s, color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .arrow:hover  { background: rgba(90,122,58,0.72); color: #fff; }
+    .arrow:disabled { opacity: 0; pointer-events: none; }
+    #aL { left:  0; border-radius: 0 6px 6px 0; }
+    #aR { right: 0; border-radius: 6px 0 0 6px; }
+
+    #dots {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 80vw;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.22);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .dot.on    { background: #7aaa52; transform: scale(1.35); }
+    .dot:hover { background: rgba(255,255,255,0.55); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <img id="slide-img" src="" alt=""/>
+  <button class="arrow" id="aL">&#8249;</button>
+  <button class="arrow" id="aR">&#8250;</button>
+  <div id="dots"></div>
+</div>
+
+<script>
+  const IMAGES = [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg",
+    "4.jpg",
+    "5.jpg",
+    "6.jpg",
+    "7.jpg",
+    "8.jpg",
+    "9.jpg",
+    "10.jpg",
+    "11.jpg",
+    "12.jpg",
+    "13.jpg",
+    "14.jpg",
+    "15.jpg",
+  ];
+
+  const img    = document.getElementById('slide-img');
+  const aL     = document.getElementById('aL');
+  const aR     = document.getElementById('aR');
+  const dotsEl = document.getElementById('dots');
+
+  const pages = IMAGES.filter(s => s && s.trim());
+  let cur = 0;
+
+  // Build dots
+  pages.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' on' : '');
+    d.onclick = () => go(i);
+    dotsEl.appendChild(d);
+  });
+
+  if (pages.length > 30) dotsEl.style.display = 'none';
+
+  function syncDots() {
+    dotsEl.querySelectorAll('.dot').forEach((d, i) =>
+      d.classList.toggle('on', i === cur)
+    );
+  }
+
+  function go(n) {
+    cur = Math.max(0, Math.min(pages.length - 1, n));
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = pages[cur];
+      img.style.opacity = '1';
+    }, 130);
+    aL.disabled = cur === 0;
+    aR.disabled = cur === pages.length - 1;
+    syncDots();
+  }
+
+  // Init
+  img.src     = pages[0];
+  aL.disabled = true;
+  aR.disabled = pages.length <= 1;
+
+  aL.onclick = () => go(cur - 1);
+  aR.onclick = () => go(cur + 1);
+
+  // Keyboard only (no touch swipe)
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(cur - 1);
+  });
+</script>
+</body>
+</html>
